@@ -21,7 +21,7 @@ def run_query(query):
         return pd.read_sql(query, conn)
 
 # 헤더 부분
-st.title("👵 서울시 고령인구 분석")
+st.title("👵 서울시 고령인구 분석 대시보드")
 st.markdown("본 대시보드는 서울시 공공데이터를 기반으로 고령화 현황을 시각화합니다.")
 st.divider()
 
