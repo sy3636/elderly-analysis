@@ -89,7 +89,6 @@ SELECT 자치구 AS 자치구명, 고령인구수 AS 고령인구_수
 FROM 고령인구
 WHERE 연도 = 2024
 ORDER BY 고령인구_수 ASC; 
--- Plotly 가로 차트는 아래에서 위로 그려지므로 ASC(오름차순) 정렬해야 큰 값이 위에 옵니다.
 """
 df2 = run_query(query2)
 
