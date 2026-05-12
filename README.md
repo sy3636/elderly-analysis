@@ -1,12 +1,12 @@
 # elderly-analysis
 
 - ai link
-  
+ 
 https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221NYsqY_Ug3y1SwyUwbaidrQwpXUHe_2We%22%5D,%22action%22:%22open%22,%22userId%22:%22106171069612521793565%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing
 
 
 - 사용한 데이터와 클린징 과정
-
+ 
 ① 서울시 자치구별 고령인구(추계인구) 통계
 https://data.seoul.go.kr/dataList/10821/S/2/datasetView.do
 * 내용: 자치구별 65세 이상 고령인구 수, 2022~2034년 (2026년 이후는 추계 데이터)
