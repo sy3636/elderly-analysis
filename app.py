@@ -13,10 +13,10 @@ st.set_page_config(page_title="서울시 고령인구 분석 대시보드", layo
 DB_FILE = "seoul_elderly.db"
 if not os.path.exists(DB_FILE):
     st.error(f"🚨 데이터베이스 파일('{DB_FILE}')을 찾을 수 없습니다. 파이썬 코드(app.py)와 같은 폴더에 파일이 있는지 확인해주세요!")
-    st.stop() # 에러가 나면 여기서 코드 실행을 멈춥니다.
+    st.stop()
 
 # 3. 데이터베이스 조회용 공통 함수
-@st.cache_data # 데이터를 한 번만 불러와서 메모리에 저장(캐싱)하여 속도를 높입니다.
+@st.cache_data
 def run_query(query):
     conn = sqlite3.connect(DB_FILE)
     df = pd.read_sql_query(query, conn)
@@ -40,18 +40,15 @@ ORDER BY 연도;
 """
 df1 = run_query(query1)
 
-# 실제 데이터(2022~2025)와 추계 데이터(2025~2034) 분리 (연결을 위해 2025년은 양쪽에 포함)
 df1_real = df1[df1['연도'] <= 2025]
 df1_pred = df1[df1['연도'] >= 2025]
 
 fig1 = go.Figure()
-# 실선 추가 (실제 데이터)
 fig1.add_trace(go.Scatter(
     x=df1_real['연도'], y=df1_real['총_고령인구_수'],
     mode='lines+markers', name='실제 데이터',
     line=dict(color='royalblue', width=3)
 ))
-# 점선 추가 (추계 데이터)
 fig1.add_trace(go.Scatter(
     x=df1_pred['연도'], y=df1_pred['총_고령인구_수'],
     mode='lines+markers', name='추계 데이터 (예측)',
@@ -65,7 +62,7 @@ fig1.update_layout(
     template='plotly_white',
     hovermode='x unified'
 )
-fig1.update_yaxes(tickformat=",d") # K, M 등 영문 단위 대신 콤마만 표시
+fig1.update_yaxes(tickformat=",d")
 
 col1_1, col1_2 = st.columns([2, 1])
 with col1_1:
@@ -98,7 +95,7 @@ fig2 = px.bar(
     title="2024년 자치구별 고령인구 순위",
     labels={'고령인구_수': '고령인구 수 (명)', '자치구명': '자치구'}
 )
-fig2.update_layout(template='plotly_white')
+fig2.update_layout(template='plotly_white', height=700)  # ← height 추가
 fig2.update_xaxes(tickformat=",d")
 
 col2_1, col2_2 = st.columns([2, 1])
@@ -136,8 +133,8 @@ fig3 = px.bar(
     labels={'독거노인_비율_퍼센트': '독거노인 비율 (%)', '자치구명': '자치구'}
 )
 fig3.update_traces(marker_color='indianred')
-fig3.update_layout(template='plotly_white')
-fig3.update_xaxes(tickformat=",.1f") # 소수점 1자리까지 표시
+fig3.update_layout(template='plotly_white', height=700)  # ← height 추가
+fig3.update_xaxes(tickformat=",.1f")
 
 col3_1, col3_2 = st.columns([2, 1])
 with col3_1:
@@ -168,15 +165,12 @@ ORDER BY 총_독거노인_수 DESC;
 """
 df4 = run_query(query4)
 
-# 이중축 그래프 생성
 fig4 = make_subplots(specs=[[{"secondary_y": True}]])
 
-# 왼쪽 y축 (막대형: 독거노인 수)
 fig4.add_trace(
     go.Bar(x=df4['자치구명'], y=df4['총_독거노인_수'], name="독거노인 수", marker_color='lightblue'),
     secondary_y=False,
 )
-# 오른쪽 y축 (선형: 복지시설 수)
 fig4.add_trace(
     go.Scatter(x=df4['자치구명'], y=df4['복지시설_수'], name="복지시설 수", mode='lines+markers', marker_color='red'),
     secondary_y=True,
@@ -204,6 +198,5 @@ with col4_2:
     * 시설 확충 시 단순히 인구수가 아닌, 독거노인 밀집도를 고려한 자원 배분이 시급합니다.
     """)
 
-# 하단 데이터 출처 캡션
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.caption("데이터 출처: 서울 열린데이터 광장")
