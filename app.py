@@ -38,26 +38,27 @@ ORDER BY 연도
 df1 = run_query(sql1)
 
 with col1:
-    # 데이터 분리 (연결을 위해 2025년을 양쪽에 포함)
     actual = df1[df1['연도'] <= 2025]
     projected = df1[df1['연도'] >= 2025]
 
     fig1 = go.Figure()
-    # 실선 (실제)
     fig1.add_trace(go.Scatter(x=actual['연도'], y=actual['총인구'], name='실제 데이터',
                              line=dict(color='royalblue', width=3)))
-    # 점선 (추계)
     fig1.add_trace(go.Scatter(x=projected['연도'], y=projected['총인구'], name='추계 데이터 (예측)',
                              line=dict(color='royalblue', width=3, dash='dot')))
-    
     fig1.update_layout(hovermode='x unified', template='plotly_white')
     st.plotly_chart(fig1, use_container_width=True)
 
 with col2:
     st.markdown("##### 💻 사용한 SQL")
     st.code(sql1, language='sql')
-    st.markdown("##### 💡 인사이트")
-    st.info("2025년을 기점으로 서울시 고령인구가 가파르게 상승하여 2030년 이후에는 초고령 사회의 특징이 더욱 두드러질 것으로 예측됩니다.")
+    st.markdown("##### 💡 데이터 인사이트")
+    st.info("""
+    **데이터 인사이트**
+    * 2025년을 기점으로 서울시 고령인구 증가세가 더욱 가팔라지는 양상을 보입니다.
+    * 2030년 이후에는 2022년 대비 약 1.5배 이상의 고령인구가 거주할 것으로 예측됩니다.
+    * 향후 10년간 폭발적으로 증가하는 노인 인구를 대비한 장기적인 복지 예산 편성이 시급합니다.
+    """)
 
 st.divider()
 
@@ -82,8 +83,13 @@ with col1:
 with col2:
     st.markdown("##### 💻 사용한 SQL")
     st.code(sql2, language='sql')
-    st.markdown("##### 💡 인사이트")
-    st.info("특정 자치구(예: 송파구, 강서구 등)의 고령인구 절대 수치가 높게 나타나며, 해당 지역의 복지 수요가 높을 것으로 판단됩니다.")
+    st.markdown("##### 💡 데이터 인사이트")
+    st.info("""
+    **데이터 인사이트**
+    * 송파구와 강서구가 서울시 내에서 고령인구가 가장 많은 자치구로 확인됩니다.
+    * 인구 규모가 큰 자치구일수록 고령인구의 절대 수치도 높게 나타나는 경향이 있습니다.
+    * 하위권 구와 비교했을 때 최대 3배 이상의 인구 차이가 발생하여 자치구별 맞춤 전략이 필요합니다.
+    """)
 
 st.divider()
 
@@ -112,10 +118,56 @@ with col1:
 with col2:
     st.markdown("##### 💻 사용한 SQL")
     st.code(sql3, language='sql')
-    st.markdown("##### 💡 인사이트")
-    st.info("단순 인구수뿐만 아니라 독거노인 비율을 통해 고립 위험이 높은 지역을 식별할 수 있습니다. 일부 외곽 지역에서 비율이 높게 나타납니다.")
+    st.markdown("##### 💡 데이터 인사이트")
+    st.info("""
+    **데이터 인사이트**
+    * 강북구와 중구 지역이 전체 고령인구 중 홀로 거주하는 노인의 비율이 가장 높습니다.
+    * 인구수가 많았던 송파구보다 오히려 도심권이나 전통적인 주거 밀집 지역의 독거 비율이 높게 나타납니다.
+    * 비율이 높은 지역은 고독사 예방 등 밀착형 돌봄 서비스의 우선 순위가 높아야 함을 의미합니다.
+    """)
 
 st.divider()
 
 # --- [차트 4: 복지시설 vs 독거노인 수 비교] ---
-st.subheader
+st.subheader("④ 자치구별 복지시설 수 vs 독거노인 수 비교")
+col1, col2 = st.columns([1.5, 1])
+
+sql4 = """
+SELECT 
+    W.자치구, 
+    W.시설합계 AS 복지시설수, 
+    SUM(S.독거노인수) AS 총_독거노인수
+FROM 복지시설 W
+JOIN 독거노인 S ON W.자치구_id = S.자치구_id
+GROUP BY W.자치구_id, W.자치구, W.시설합계
+ORDER BY 총_독거노인수 DESC
+"""
+df4 = run_query(sql4)
+
+with col1:
+    fig4 = make_subplots(specs=[[{"secondary_y": True}]])
+    fig4.add_trace(go.Bar(x=df4['자치구'], y=df4['총_독거노인수'],
+                         name="독거노인 수 (명)", marker_color='lightblue'),
+                  secondary_y=False)
+    fig4.add_trace(go.Scatter(x=df4['자치구'], y=df4['복지시설수'],
+                             name="복지시설 수 (개)", mode='lines+markers',
+                             marker_color='red'),
+                  secondary_y=True)
+    fig4.update_layout(template='plotly_white', hovermode='x unified')
+    fig4.update_yaxes(title_text="독거노인 수 (명)", secondary_y=False)
+    fig4.update_yaxes(title_text="복지시설 수 (개)", secondary_y=True)
+    st.plotly_chart(fig4, use_container_width=True)
+
+with col2:
+    st.markdown("##### 💻 사용한 SQL")
+    st.code(sql4, language='sql')
+    st.markdown("##### 💡 데이터 인사이트")
+    st.info("""
+    **데이터 인사이트**
+    * 독거노인 수가 많은 구라고 해서 반드시 복지시설 수가 많은 것은 아님이 확인됩니다.
+    * 특정 자치구는 돌봄 수요(독거노인)에 비해 인프라(시설)가 부족한 '복지 불균형' 상태를 보입니다.
+    * 시설 확충 시 단순히 인구수가 아닌, 독거노인 밀집도를 고려한 자원 배분이 시급합니다.
+    """)
+
+st.divider()
+st.caption("데이터 출처: 서울 열린데이터 광장 (본 데이터는 교육용으로 가공되었습니다.)")
